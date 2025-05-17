@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Study Guide</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    .question-block {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .answer {
+      display: none;
+      margin-top: 10px;
+      font-style: italic;
+      color: #007BFF;
+    }
+    .quiz {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .quiz-question {
+      margin-bottom: 20px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Interactive Study Guide</h1>
+
+<div id="questions"></div>
+
+<div class="quiz">
+  <h2>Complete Quiz</h2>
+  <form id="quiz-form"></form>
+  <button type="button" onclick="checkQuiz()">Check Answers</button>
+  <div id="quiz-result"></div>
+</div>
+
+<script>
+function toggleAnswer(button) {
+  const answer = button.previousElementSibling;
+  answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+}
+
+// This will be dynamically filled in a separate step to avoid exceeding the message size limit.
+const questions = [
+  ["What is the smallest unit of an element?", "Atoms"],
+  ["What is the difference between a physical change and a chemical change?", "Physical changes affect appearance; chemical changes create new substances."],
+  ["Give an example of a (a) chemical reaction and (b) physical change.", "(a) Burning wood; (b) Melting ice."],
+  ["Which group of elements is most likely to form a bond with chlorine (Cl)?", "Alkali metals"],
+  ["What property of metals makes them good conductors?", "Presence of mobile electrons."],
+  ["What are the physical characteristics of gases?", "No definite shape/volume, compressible, low density, diffuse/effuse easily."],
+  ["Describe the subatomic structure of an element with atomic number 12.", "12 protons and 12 electrons in a neutral atom."],
+  ["What is a sign of a chemical reaction?", "Temperature change."],
+  ["What is an exothermic reaction? Example?", "Releases heat. Example: Combustion of wood."],
+  ["What happens when vinegar is added to baking soda?", "Acid-base neutralization reaction."],
+  ["The number of protons determines what?", "Atomic number."],
+  ["If the number of neutrons changes, what happens?", "Atomic mass changes, element stays the same."],
+  ["6 protons, 6 neutrons, 6 electrons. Atomic number and mass?", "Atomic number: 6, Mass number: 12."],
+  ["Why do atoms form bonds?", "To reach a more stable energy state."],
+  ["Newton's First Law?", "Object in motion stays in motion unless acted on by force."],
+  ["What results from unbalanced forces?", "Acceleration."],
+  ["Formula for acceleration?", "a = v/t"],
+  ["If force doubles, what happens to acceleration?", "Acceleration doubles."],
+  ["Object moving at constant speed. Forces?", "Net force = 0."],
+  ["Object at rest. Forces?", "Balanced. Net force = 0."],
+  ["What affects friction?", "Surface roughness and applied force."],
+  ["What happens to momentum with no external forces?", "Momentum remains constant."],
+  ["When two objects collide and stick, total momentum?", "Remains constant."],
+  ["If mass doubles, what happens to momentum?", "Momentum doubles if velocity is constant."],
+  ["What type of energy is in a battery?", "Chemical energy."],
+  ["What energy is motion of particles?", "Kinetic energy."],
+  ["What happens when temperature increases?", "Particles move faster, gain kinetic energy."],
+  ["Primary energy source for life on Earth?", "The Sun."],
+  ["What happens in energy transfer?", "Energy moves from one place/system to another."],
+  ["What happens to potential energy downhill?", "Decreases."],
+  ["What is conduction?", "Energy transfer through direct contact."],
+  ["What is convection?", "Heat transfer via fluid movement."],
+  ["What is radiant energy?", "Energy as electromagnetic waves."],
+  ["What increases engine efficiency?", "More useful work, less waste."],
+  ["Car engine 20% efficient, 200 J used. Work output?", "40 J."],
+  ["What is a transverse wave?", "Particles move perpendicular to wave direction."],
+  ["What is wave frequency?", "Number of cycles per second."],
+  ["Light through prism?", "Separates into colors via dispersion."],
+  ["What type of wave transmits sound?", "Longitudinal wave."],
+  ["How do fiber-optic cables work?", "Transmit light signals."],
+  ["Which tech uses EM waves for long-distance info?", "Radio technology."],
+  ["Important control factor in sound-speed experiment?", "Temperature."],
+  ["Variable to change in light bulb efficiency test?", "Type of bulb."],
+  ["What to keep constant in friction test?", "The object used."]
+];
+
+const distractors = [
+  ["Molecules", "Neutrons", "Electrons"],
+  ["Chemical changes only affect size", "Physical changes form new substances", "They are the same thing"],
+  ["Boiling water; Freezing air", "Melting rock; Burning steel", "Dissolving salt; Cutting paper"],
+  ["Noble gases", "Halogens", "Transition metals"],
+  ["High melting points", "Heavy nuclei", "Neutrons in core"],
+  ["Defined volume", "Always visible", "Heavy particles"],
+  ["12 neutrons and 12 electrons", "12 protons and 14 electrons", "6 protons and 6 electrons"],
+  ["Color change", "Size increase", "Sound production"],
+  ["Absorbs energy", "Forms water", "Melts ice"],
+  ["Precipitation reaction", "Synthesis reaction", "Combustion reaction"],
+  ["Mass number", "Atomic mass", "Electron number"],
+  ["It becomes a new element", "Atomic number changes", "It ionizes"],
+  ["Atomic number: 12, Mass: 18", "Atomic number: 18, Mass: 6", "Atomic number: 6, Mass: 10"],
+  ["To lose electrons", "To grow larger", "To move faster"],
+  ["Equal and opposite force", "Force equals mass times acceleration", "Action causes reaction"],
+  ["Remain still", "Reverse", "Break apart"],
+  ["v = a * t", "F = ma", "d = rt"],
+  ["Decreases", "Stays the same", "Halves"],
+  ["Speed increases", "Acceleration stops", "Forces increase"],
+  ["They are unbalanced", "They are increasing", "They oppose motion"],
+  ["Mass of objects", "Color of objects", "Size of contact area only"],
+  ["It increases", "It disappears", "It reduces to zero"],
+  ["Increases greatly", "Doubles and decreases", "Becomes energy"],
+  ["Velocity increases", "Speed halves", "Energy increases"],
+  ["Kinetic", "Potential", "Sound"],
+  ["Thermal", "Chemical", "Light"],
+  ["They stop", "They shrink", "They freeze"],
+  ["Electricity", "Wind", "Gravity"],
+  ["It is destroyed", "It stops", "It becomes heat only"],
+  ["Increases", "Becomes kinetic", "Turns into chemical"],
+  ["Convection", "Radiation", "Chemical reaction"],
+  ["Conduction", "Radiation", "Evaporation"],
+  ["Magnetic energy", "Potential energy", "Mechanical energy"],
+  ["More fuel used", "Higher temperatures", "More waste energy"],
+  ["100 J", "20 J", "80 J"],
+  ["Waves with particles moving parallel", "Particles move in circular motion", "Particles vibrate randomly"],
+  ["Wave height", "Wavelength", "Amplitude"],
+  ["It reflects", "It disappears", "It increases"],
+  ["Transverse", "Circular", "Gamma"],
+  ["Electricity signals", "Magnetism", "Sound pulses"],
+  ["Microwaves", "Sound waves", "Magnetism"],
+  ["Humidity", "Material thickness", "Wavelength"],
+  ["Voltage", "Brand name", "Color"],
+  ["Weight", "Surface material", "Height of object"]
+];
+
+// TEMPORARY PLACEHOLDER: We'll dynamically fill in the rest of the 47-question quiz content next.
+
+const container = document.getElementById('questions');
+const quizForm = document.getElementById('quiz-form');
+questions.forEach(([q, a], i) => {
+  const block = document.createElement('div');
+  block.className = 'question-block';
+  block.innerHTML = `<strong>${i + 1}. ${q}</strong><div class="answer">${a}</div><button onclick="toggleAnswer(this)">Show Answer</button>`;
+  container.appendChild(block);
+
+  const options = [...distractors[i], a].sort(() => Math.random() - 0.5);
+  const quizItem = document.createElement('div');
+  quizItem.className = 'quiz-question';
+  quizItem.innerHTML = `<label>${i + 1}. ${q}</label><br>` +
+    options.map(opt => `
+      <label><input type="radio" name="quiz${i}" value="${opt}" data-answer="${a}"> ${opt}</label><br>
+    `).join('');
+  quizForm.appendChild(quizItem);
+});
+
+function checkQuiz() {
+  let correct = 0;
+  const questions = document.querySelectorAll('.quiz-question');
+  questions.forEach(q => {
+    const checked = q.querySelector('input[type="radio"]:checked');
+    if (checked && checked.value === checked.dataset.answer) {
+      correct++;
+      checked.parentElement.style.backgroundColor = '#c8e6c9';
+    } else if (checked) {
+      checked.parentElement.style.backgroundColor = '#ffcdd2';
+    }
+  });
+  document.getElementById('quiz-result').textContent = `You got ${correct} out of ${questions.length} correct.`;
+}
+</script>
+
+</body>
+</html>
